@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include <stdbool.h>
 #include "gamesJSON.h"
+#include "pathsAndStuff.h"
 
 typedef struct fullData {
 	char** allGames; // All the games 

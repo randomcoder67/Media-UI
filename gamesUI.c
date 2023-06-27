@@ -2,11 +2,11 @@
 
 static int gridWidth = 4;
 static GtkWindow *window; // The window
-static char* currentGames[50]; // The array of current games (max 50) (need to add handling for if it goes over 50)
+static char* currentGames[MAX_CURRENT_GAMES]; // The array of current games (max 50) (need to add handling for if it goes over 50)
 static GtkWidget* currentScrolled; // The scrolled widget for the "Current" tab
-static GtkWidget* theWidgets[14]; // The other scrolled widgets
-static GtkWidget* theImages[1000]; // The images
-static GtkWidget* currentImages[50]; // The images
+static GtkWidget* theWidgets[NUM_GENRES]; // The other scrolled widgets
+static GtkWidget* theImages[NUM_GENRES*MAX_GAMES_PER_GENRE]; // The images
+static GtkWidget* currentImages[MAX_CURRENT_GAMES]; // The images
 
 // Function to check the size of the window and resize if necessary (i.e. if there is room for more/not enough room for the grids)
 void getSize(GtkApplication *app, gpointer user_data) {
@@ -24,9 +24,9 @@ void getSize(GtkApplication *app, gpointer user_data) {
 	}
 
 	fullData* toUse = (fullData*)user_data;
-	int numGenres = toUse->genres; // Number of genres
+	//int numGenres = toUse->genres; // Number of genres
 	
-	for (int i=0; i<numGenres; i++) {
+	for (int i=0; i<NUM_GENRES; i++) {
 		addGames(theWidgets[i], toUse->allGames, toUse->maxGenre, i, toUse->genreLengths, addGameToCurrent, theImages);
 		gtk_widget_show_all(theWidgets[i]);			
 	}
@@ -102,10 +102,10 @@ void saveJSONToFile() {
 	int lengthHome = strlen(getenv("HOME"));
 	char home[lengthHome-1];
 	strcpy(home, getenv("HOME"));
-	int lengthCurrent = strlen("/Programs/output/updated/current.json");
+	int lengthCurrent = strlen(CURRENT_SAVE_PATH);
 	char fileNameCurrentGames[lengthHome+lengthCurrent+1];
 	strcpy(fileNameCurrentGames, home);
-	strcat(fileNameCurrentGames, "/Programs/output/updated/current.json");
+	strcat(fileNameCurrentGames, CURRENT_SAVE_PATH);
 	
 	// Save to file and free root
 	if (json_object_to_file(fileNameCurrentGames, newRoot)) {
@@ -218,14 +218,14 @@ void makeImages(char** allGames, int numGames, int curGenre, int* genreLengths, 
 		int lengthHome = strlen(getenv("HOME"));
 		char home[lengthHome-1];
 		strcpy(home, getenv("HOME"));
-		int lengthCurrent = strlen("/Downloads/final/bmpResized/");
+		int lengthCurrent = strlen(COVER_ART_PATH);
 		char partFilename[lengthHome+lengthCurrent+1];
 		strcpy(partFilename, home);
-		strcat(partFilename, "/Downloads/final/bmpResized/");
+		strcat(partFilename, COVER_ART_PATH);
 		
 		int lengthTemp = strlen(partFilename) + 2 + strlen(allGames[i+curGenre*numGames]);
 		
-		char* extension = ".bmp";
+		char* extension = COVER_ART_EXTENSION;
 		char tempFilename[lengthTemp];
 		strcpy(tempFilename, partFilename);
 		strcat(tempFilename, allGames[i+curGenre*numGames]);
@@ -316,7 +316,7 @@ static void activate(GtkApplication* app, gpointer user_data) {
 	
 	// Get the struct that was passed in
 	fullData* toUse = (fullData*)user_data;
-	int numGenres = toUse->genres; // Number of genres
+	//int numGenres = toUse->genres; // Number of genres
 
 	// Create window, grid, stack and sidebar
 	window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
@@ -330,8 +330,8 @@ static void activate(GtkApplication* app, gpointer user_data) {
 	gtk_grid_attach(GTK_GRID(grid), GTK_WIDGET(stack), 1, 0, 1, 1);
 	
 	// Add the panels
-	for (int i=0; i<numGenres+1; i++) {
-		if (i < numGenres) { // If it is a genre 
+	for (int i=0; i<NUM_GENRES+1; i++) {
+		if (i < NUM_GENRES) { // If it is a genre 
 			theWidgets[i] = addPanel(stack, toUse->allGenres[i]);
 		}
 		else { // If it is the "Current" panel
@@ -358,12 +358,12 @@ static void activate(GtkApplication* app, gpointer user_data) {
 		}
 	}
 	
-	for (int i=0; i<numGenres; i++) {
+	for (int i=0; i<NUM_GENRES; i++) {
 		makeImages(toUse->allGames, toUse->maxGenre, i, toUse->genreLengths, theImages);
 	}
 	
 	// Add the grids for genres (current already added)
-	for (int i=0; i<numGenres; i++) {
+	for (int i=0; i<NUM_GENRES; i++) {
 		addGames(theWidgets[i], toUse->allGames, toUse->maxGenre, i, toUse->genreLengths, addGameToCurrent, theImages);
 	}
 
