@@ -17,13 +17,13 @@ To Do:
 
 Edit pathsAndStuff.h and choose the paths and values. The values are: 
 
-`CURRENT_SAVE_PATH` = Path where the JSON representing the "Current" section should be saved (e.g. `.local/share/mediaUI/currentGames.json`)
-`ALL_GAMES_JSON_PATH` = Path where the JSON file containing all the games is located (e.g. `.local/share/mediaUI/allGames.json`)
-`COVER_ART_PATH` = Path where the cover art is located (e.g. `~/.local/share/mediaUI/coverArt/`
-`COVER_ART_EXTENSION` = File extension of the cover art (e.g. `.png`) 
-`NUM_GENRES` = Number of genres you have (not including "Current") (e.g. `14`)
-`MAX_CURRENT_GAMES` = Maximum number of games in the "Current" section (e.g. `50`)
-`MAX_GAMES_PER_GENRE` = Maximum number of games per genre (e.g. `50`)
+`CURRENT_SAVE_PATH` = Path where the JSON representing the "Current" section should be saved (e.g. `.local/share/mediaUI/currentGames.json`)  
+`ALL_GAMES_JSON_PATH` = Path where the JSON file containing all the games is located (e.g. `.local/share/mediaUI/allGames.json`)  
+`COVER_ART_PATH` = Path where the cover art is located (e.g. `~/.local/share/mediaUI/coverArt/`)  
+`COVER_ART_EXTENSION` = File extension of the cover art (e.g. `.png`)  
+`NUM_GENRES` = Number of genres you have (not including "Current") (e.g. `14`)  
+`MAX_CURRENT_GAMES` = Maximum number of games in the "Current" section (e.g. `50`)  
+`MAX_GAMES_PER_GENRE` = Maximum number of games per genre (e.g. `50`)  
 
 `make` - That's about it, dependancies are `json-c` and `gtk` but those are likely already installed
 
