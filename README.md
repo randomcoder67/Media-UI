@@ -37,7 +37,8 @@ In the repository is a python script `convert.py`. This can be used to convert a
 Usage: `convert.py input.md`
 
 The cover art is expected to be all in one folder, with file names the same as the game name + ext.  
-Basically all normal image formats are supported except webp. 
+Basically all normal image formats are supported except webp.  
+Recommended Source: [SteamGridDB](https://www.steamgriddb.com/)
 
 ## Usage
 
