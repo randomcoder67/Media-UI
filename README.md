@@ -2,7 +2,7 @@
 
 A program to display all the games you own, sorted by genre, and allows selecting certain games to be in a "Current" section to keep track of the games you are currently playing. 
 
-[Media UI Example Screenshot](screenshot.png)
+![Media UI Example Screenshot](screenshot.png)
 
 To Do: 
 
