@@ -2,6 +2,13 @@
 
 A program to display all the games you own, sorted by genre, and allows selecting certain games to be in a "Current" section to keep track of the games you are currently playing. 
 
+To Do: 
+
+* Tidy up code
+* Remove some magic numbers (for example the size of some arrays)
+* Add in support for mutliple types of media (e.g. Add option to pick between displaying games, music or movies)
+* Add some more detail to the games (for example platform)
+
 ## Setup
 
 ### Installation 
@@ -23,11 +30,11 @@ The program works by reading a JSON file of all the games you have, organised by
 ```
 The info isn't important, it's not used yet. Just the `genreName` and `gameName`. By default it expects up to 14 genres, and up to 71 games per genre. 
 
-In the repository is a python script `convert.py`. This can be used to convert a markdown file of games into the required JSON file. The markdown file would be of the format:
+In the repository is a python script `convert.py`. This can be used to convert a markdown file of games into the required JSON file. The markdown file should be of the format:
 ```md
 # Platform
 
-## Medium (Disk or Digital)
+## Medium (Disc/PSN etc)
 
 ### Genre
 
@@ -38,7 +45,7 @@ Usage: `convert.py input.md`
 
 The cover art is expected to be all in one folder, with file names the same as the game name + ext.  
 Basically all normal image formats are supported except webp.  
-Recommended Source: [SteamGridDB](https://www.steamgriddb.com/)
+Recommended source: [SteamGridDB](https://www.steamgriddb.com/)
 
 ## Usage
 
