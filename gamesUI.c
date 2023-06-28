@@ -308,7 +308,7 @@ static void activate(GtkApplication* app, gpointer user_data) {
 
 	// Add window and set properties 
 	gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(grid));
-	gtk_window_set_title(GTK_WINDOW(window), "Media UI\n");
+	gtk_window_set_title(GTK_WINDOW(window), "Media UI");
 	gtk_window_set_default_size (GTK_WINDOW (window), 1200, 1000);
 	g_signal_connect(G_OBJECT(window), "destroy", gtk_main_quit, NULL);
 	g_signal_connect(G_OBJECT(window), "key_press_event", G_CALLBACK(check_escape), NULL);
