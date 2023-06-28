@@ -1,4 +1,5 @@
 #include "gamesUI.h"
+#include "gamesJSON.h"
 
 static int gridWidth = 4;
 static GtkWindow *window; // The window
@@ -8,6 +9,20 @@ static GtkWidget* theWidgets[NUM_GENRES]; // The other scrolled widgets
 static GtkWidget* theImages[NUM_GENRES*MAX_GAMES_PER_GENRE]; // The images
 static GtkWidget* currentImages[MAX_CURRENT_GAMES]; // The images
 
+// Needed for qsort
+static int myCompare(const void* a, const void* b) {
+	return strcmp(*(const char**)a, *(const char**)b);
+}
+
+// Remake and refresh the "Current" section
+void remakeCurrent(int lenCurrent) {
+	int genreLengths[] = {lenCurrent};
+	gtk_container_remove (GTK_CONTAINER (currentScrolled), gtk_bin_get_child (GTK_BIN (currentScrolled)));
+	makeImages(currentGames, lenCurrent, 0, genreLengths, currentImages);
+	addGames(currentScrolled, currentGames, lenCurrent, 0, genreLengths, removeGameFromCurrent, currentImages);
+	gtk_widget_show_all(currentScrolled);
+}
+
 // Function to check the size of the window and resize if necessary (i.e. if there is room for more/not enough room for the grids)
 void getSize(GtkApplication *app, gpointer user_data) {
 	int h, w;
@@ -15,9 +30,7 @@ void getSize(GtkApplication *app, gpointer user_data) {
 	int stackWidth = w - 176; // The sidebar takes up 176 pixels
 	
 	// If the correct grid width is already inplace, return
-	if (stackWidth/220 == gridWidth) {
-		return;	
-	}
+	if (stackWidth/220 == gridWidth) return;
 	// Otherwise set the new grid width and remake the widgets
 	else {
 		gridWidth = stackWidth/220;
@@ -33,34 +46,18 @@ void getSize(GtkApplication *app, gpointer user_data) {
 	
 	int lenCurrent = 0;
 	for (int i=0; i<50; i++) {	
-		if (strcmp(currentGames[i], "END") == 0) {
-			break;
-		}
+		if (strcmp(currentGames[i], "END") == 0) break;
 		lenCurrent++;
 	}
-	int genreLengths[] = {lenCurrent};
-	gtk_container_remove (GTK_CONTAINER (currentScrolled), gtk_bin_get_child (GTK_BIN (currentScrolled)));
-	makeImages(currentGames, lenCurrent, 0, genreLengths, currentImages);
-	addGames(currentScrolled, currentGames, lenCurrent, 0, genreLengths, removeGameFromCurrent, currentImages);
-	gtk_widget_show_all(currentScrolled);
-}
-
-
-// Needed for qsort
-static int myCompare(const void* a, const void* b) {
-	return strcmp(*(const char**)a, *(const char**)b);
+	remakeCurrent(lenCurrent);
 }
 
 // Checks if a game is in the currentGames array. 
 bool isGameInCurrent(char* game) {
 	for (int i=0; i<50; i++) {
 		// If the end is reached without finding a match, no match present
-		if (strcmp(currentGames[i], "END") == 0) {
-			break;
-		}
-		if (strcmp(currentGames[i], game) == 0) {
-			return true;
-		}
+		if (strcmp(currentGames[i], "END") == 0) break;
+		if (strcmp(currentGames[i], game) == 0) return true;
 	}
 	return false;
 }
@@ -90,22 +87,16 @@ void saveJSONToFile() {
 	json_object* currentArray = json_object_new_array();
 	// Add games from currentGames to currentArray
 	for (int i=0; i<50; i++) {
-		if (strcmp(currentGames[i], "END") == 0) {
-			break;
-		}
+		if (strcmp(currentGames[i], "END") == 0) break;
 		json_object_array_put_idx(currentArray, i, json_object_new_string(currentGames[i]));
 	}
 	// Add currentArray to newRoot
 	json_object_object_add(newRoot, "current", currentArray);
 	
-	// Get filename
-	int lengthHome = strlen(getenv("HOME"));
-	char home[lengthHome-1];
-	strcpy(home, getenv("HOME"));
-	int lengthCurrent = strlen(CURRENT_SAVE_PATH);
-	char fileNameCurrentGames[lengthHome+lengthCurrent+1];
-	strcpy(fileNameCurrentGames, home);
-	strcat(fileNameCurrentGames, CURRENT_SAVE_PATH);
+	// Get file name
+	int lengthCurrentFileName = strlen(getenv("HOME")) + strlen(CURRENT_SAVE_PATH) + 1;
+	char fileNameCurrentGames[lengthCurrentFileName];
+	strcpy(fileNameCurrentGames, getenv("HOME")); strcat(fileNameCurrentGames, CURRENT_SAVE_PATH);
 	
 	// Save to file and free root
 	if (json_object_to_file(fileNameCurrentGames, newRoot)) {
@@ -146,23 +137,15 @@ void removeGameFromCurrent(GtkApplication* app, gpointer data) {
 			break;
 		}
 	}
-	// Sort the array
+	// Sort the array and update widget
 	sortCurrentGames(lenCurrent);
-	
-	// Update the widget
-	int genreLengths[] = {lenCurrent};
-	gtk_container_remove (GTK_CONTAINER (currentScrolled), gtk_bin_get_child (GTK_BIN (currentScrolled)));
-	makeImages(currentGames, lenCurrent, 0, genreLengths, currentImages);
-	addGames(currentScrolled, currentGames, lenCurrent, 0, genreLengths, removeGameFromCurrent, currentImages);
-	gtk_widget_show_all(currentScrolled);
+	remakeCurrent(lenCurrent);
 }
 
 // Adds a game from currentGames
 void addGameToCurrent(GtkApplication* app, gpointer data) {
 	// Don't allow duplicates 
-	if (isGameInCurrent((char*)data)) {
-		return;
-	}
+	if (isGameInCurrent((char*)data)) return;
 	int lenCurrent = 0; // Used to get number of games present
 	for (int i=0; i<50; i++) {
 		// Once you find the first END, add the game to that index, and set the next index to END
@@ -173,15 +156,9 @@ void addGameToCurrent(GtkApplication* app, gpointer data) {
 			break;
 		}
 	}
-	// Sort the array
+	// Sort the array and update widget
 	sortCurrentGames(lenCurrent);
-	
-	// Update the widget
-	int genreLengths[] = {lenCurrent};
-	gtk_container_remove (GTK_CONTAINER (currentScrolled), gtk_bin_get_child (GTK_BIN (currentScrolled)));
-	makeImages(currentGames, lenCurrent, 0, genreLengths, currentImages);
-	addGames(currentScrolled, currentGames, lenCurrent, 0, genreLengths, removeGameFromCurrent, currentImages);
-	gtk_widget_show_all(currentScrolled);
+	remakeCurrent(lenCurrent);
 }
 
 // q to quit function
@@ -195,9 +172,7 @@ static gboolean check_escape(GtkWidget *widget, GdkEventKey *event, gpointer dat
 
 // Adds a scrolled widget to the stack
 GtkWidget* addPanel(GtkStack* stack, char* name) {
-	GtkWidget *scrolled1; // Initialise widget pointer
-
-	scrolled1 = gtk_scrolled_window_new(NULL, NULL); // Create widget
+	GtkWidget *scrolled1 = gtk_scrolled_window_new(NULL, NULL); // Create widget
 	gtk_widget_set_vexpand(scrolled1, true); // Allow expanding
 	gtk_widget_set_hexpand(scrolled1, true);
 	// Add it to the stack with the given name
@@ -207,46 +182,23 @@ GtkWidget* addPanel(GtkStack* stack, char* name) {
 
 void makeImages(char** allGames, int numGames, int curGenre, int* genreLengths, GtkWidget** toAddTo) {
 	for (int i=0; i<numGames; i++) {
-		// Initalise widget pointers
-		GdkPixbuf* pixbufA;
-		GtkWidget* imageA;
-		if (i == genreLengths[curGenre]) { // If end of the games reached, break
-			break;
-		}
-		
-		// Get image filename 
-		int lengthHome = strlen(getenv("HOME"));
-		char home[lengthHome-1];
-		strcpy(home, getenv("HOME"));
-		int lengthCurrent = strlen(COVER_ART_PATH);
-		char partFilename[lengthHome+lengthCurrent+1];
-		strcpy(partFilename, home);
-		strcat(partFilename, COVER_ART_PATH);
-		
-		int lengthTemp = strlen(partFilename) + 2 + strlen(allGames[i+curGenre*numGames]);
-		
-		char* extension = COVER_ART_EXTENSION;
-		char tempFilename[lengthTemp];
-		strcpy(tempFilename, partFilename);
-		strcat(tempFilename, allGames[i+curGenre*numGames]);
-		
-		int lengthFinal = strlen(tempFilename) + 2 + strlen(extension);
-		char finalFilename[lengthFinal];
-		strcpy(finalFilename, tempFilename);
-		strcat(finalFilename, extension);
-		
+		if (i == genreLengths[curGenre]) break; // If end of the games reached, break
+
+		// Get image filename
+		int lengthImageFilename = strlen(getenv("HOME")) + strlen(COVER_ART_PATH) + strlen(allGames[i+curGenre*numGames]) + strlen(COVER_ART_EXTENSION) + 1;
+		char imageFilename[lengthImageFilename];
+		strcpy(imageFilename, getenv("HOME")); strcat(imageFilename, COVER_ART_PATH); strcat(imageFilename, allGames[i+curGenre*numGames]); strcat(imageFilename, COVER_ART_EXTENSION);
 		
 		// Create image widget
-		pixbufA = gdk_pixbuf_new_from_file(finalFilename, NULL);
+		GdkPixbuf* pixbufA = gdk_pixbuf_new_from_file(imageFilename, NULL);
 		pixbufA = gdk_pixbuf_scale_simple(pixbufA, 200, 300, GDK_INTERP_BILINEAR);
-		imageA = gtk_image_new_from_pixbuf(pixbufA);
+		GtkWidget* imageA = gtk_image_new_from_pixbuf(pixbufA);
 		gtk_widget_set_margin_start(imageA, 10);
 		gtk_widget_set_margin_end(imageA, 10);
 		
 		// Attach to master grid
 		int posY = i/gridWidth;
 		int posX = i-gridWidth-(posY*gridWidth);
-		
 		toAddTo[i+curGenre*numGames] = imageA;
 	}
 }
@@ -254,16 +206,11 @@ void makeImages(char** allGames, int numGames, int curGenre, int* genreLengths, 
 // Adds the games from a specific genre to the given scrolled widget
 void addGames(GtkWidget* scrolled, char** allGames, int numGames, int curGenre, int* genreLengths, void (*func)(GtkApplication *, void *), GtkWidget** toTakeFrom) {
 	// Create the main grid all the games/buttons will be added to
-	GtkWidget* gridMaster;
-	gridMaster = gtk_grid_new();
+	GtkWidget* gridMaster = gtk_grid_new();
 	
 	for (int i=0; i<numGames; i++) {
-		// Initalise widget pointers
-		GtkWidget* gridA;
-		GtkWidget* buttonA;
-		if (i == genreLengths[curGenre]) { // If end of the games reached, break
-			break;
-		}
+		if (i == genreLengths[curGenre]) break; // If end of the games reached, break
+		
 		// Create button widget
 		int gameNameLen = strlen(allGames[i+curGenre*numGames]);
 		char newName[100];
@@ -274,14 +221,14 @@ void addGames(GtkWidget* scrolled, char** allGames, int numGames, int curGenre, 
 			newName[23] = '.';
 			newName[24] = '\0';
 		}
-		buttonA = gtk_button_new_with_label(newName);
+		GtkWidget* buttonA = gtk_button_new_with_label(newName);
 		g_signal_connect(buttonA, "clicked", G_CALLBACK ((*func)), allGames[i+curGenre*numGames]);
 		gtk_widget_set_margin_bottom(buttonA, 10);
 		gtk_widget_set_margin_start(buttonA, 10);
 		gtk_widget_set_margin_end(buttonA, 10);
 		
 		// Create grid widget and attach image and button 
-		gridA = gtk_grid_new();
+		GtkWidget* gridA = gtk_grid_new();
 		// Get old grid and destroy it
 		GtkWidget* parent = gtk_widget_get_parent(toTakeFrom[i+curGenre*numGames]);
 		if (parent) {
@@ -302,27 +249,21 @@ void addGames(GtkWidget* scrolled, char** allGames, int numGames, int curGenre, 
 	}
 	// Add master grid to given scrolled widget
 	if (gtk_bin_get_child (GTK_BIN (scrolled))) {
-		gtk_container_remove (GTK_CONTAINER (scrolled), gtk_bin_get_child (GTK_BIN (scrolled)));
+		gtk_container_remove(GTK_CONTAINER (scrolled), gtk_bin_get_child (GTK_BIN (scrolled)));
 	}
 	gtk_container_add(GTK_CONTAINER(scrolled), gridMaster);
 }
 	
 // Main function to create the UI
 static void activate(GtkApplication* app, gpointer user_data) {
-	// Initialise pointers 
-	GtkWidget *grid;
-	GtkStack *stack;
-	GtkStackSidebar *sidebar;
+	// Initialise pointers and create widgets (window pointer is static)
+	GtkWidget *grid = gtk_grid_new();
+	GtkStack *stack = GTK_STACK(gtk_stack_new());
+	GtkStackSidebar *sidebar = GTK_STACK_SIDEBAR(gtk_stack_sidebar_new());
+	window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
 	
 	// Get the struct that was passed in
 	fullData* toUse = (fullData*)user_data;
-	//int numGenres = toUse->genres; // Number of genres
-
-	// Create window, grid, stack and sidebar
-	window = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
-	grid = gtk_grid_new();
-	stack = GTK_STACK(gtk_stack_new());
-	sidebar = GTK_STACK_SIDEBAR(gtk_stack_sidebar_new());
 
 	// Attach parts together
 	gtk_stack_sidebar_set_stack(sidebar, stack);
@@ -344,9 +285,7 @@ static void activate(GtkApplication* app, gpointer user_data) {
 			// Find number of games in currentGames
 			int lenCurrent = 0;
 			for (int i=0; i<50; i++) {
-				if (strcmp(currentGames[i], "END") == 0) {
-					break;
-				}
+				if (strcmp(currentGames[i], "END") == 0) break;
 				lenCurrent++;
 			}
 			
@@ -372,21 +311,17 @@ static void activate(GtkApplication* app, gpointer user_data) {
 	gtk_window_set_title(GTK_WINDOW(window), "Media UI\n");
 	gtk_window_set_default_size (GTK_WINDOW (window), 1200, 1000);
 	g_signal_connect(G_OBJECT(window), "destroy", gtk_main_quit, NULL);
-	g_signal_connect(window, "key_press_event", G_CALLBACK(check_escape), NULL);
+	g_signal_connect(G_OBJECT(window), "key_press_event", G_CALLBACK(check_escape), NULL);
+	g_signal_connect(G_OBJECT(window), "check-resize", G_CALLBACK(getSize), user_data);
 
 	// Create list of different icon sizes and add to window
 	GList* iconList = NULL;
-	GdkPixbuf* icon16;
-	GdkPixbuf* icon32;
-	GdkPixbuf* icon48;
-	GdkPixbuf* icon64;
-	GdkPixbuf* icon128;
 	
-	icon16 = gdk_pixbuf_new_from_file("/usr/share/icons/Papirus-Dark/16x16/apps/applications-games.svg", NULL);
-	icon32 = gdk_pixbuf_new_from_file("/usr/share/icons/Papirus-Dark/32x32/apps/applications-games.svg", NULL);
-	icon48 = gdk_pixbuf_new_from_file("/usr/share/icons/Papirus-Dark/48x48/apps/applications-games.svg", NULL);
-	icon64 = gdk_pixbuf_new_from_file("/usr/share/icons/Papirus-Dark/64x64/apps/applications-games.svg", NULL);
-	icon128 = gdk_pixbuf_new_from_file("/usr/share/icons/Papirus-Dark/128x128/apps/applications-games.svg", NULL);
+	GdkPixbuf* icon16 = gdk_pixbuf_new_from_file("/usr/share/icons/Papirus-Dark/16x16/apps/applications-games.svg", NULL);
+	GdkPixbuf* icon32 = gdk_pixbuf_new_from_file("/usr/share/icons/Papirus-Dark/32x32/apps/applications-games.svg", NULL);
+	GdkPixbuf* icon48 = gdk_pixbuf_new_from_file("/usr/share/icons/Papirus-Dark/48x48/apps/applications-games.svg", NULL);
+	GdkPixbuf* icon64 = gdk_pixbuf_new_from_file("/usr/share/icons/Papirus-Dark/64x64/apps/applications-games.svg", NULL);
+	GdkPixbuf* icon128 = gdk_pixbuf_new_from_file("/usr/share/icons/Papirus-Dark/128x128/apps/applications-games.svg", NULL);
 	
 	iconList = g_list_append(iconList, icon16);
 	iconList = g_list_append(iconList, icon32);
@@ -395,7 +330,6 @@ static void activate(GtkApplication* app, gpointer user_data) {
 	iconList = g_list_append(iconList, icon128);
 	
 	gtk_window_set_icon_list(GTK_WINDOW(window), iconList);
-	g_signal_connect(G_OBJECT(window), "check-resize", G_CALLBACK(getSize), user_data);
 	// Show window
 	gtk_widget_show_all (GTK_WIDGET(window));
 	gtk_main();
@@ -403,11 +337,8 @@ static void activate(GtkApplication* app, gpointer user_data) {
 
 // Called to start building the UI
 int initUI(fullData toUse) {
-	GtkApplication *app;
-	int status;
-	status = 0;
-	
-	app = gtk_application_new ("org.gtk.example", G_APPLICATION_DEFAULT_FLAGS);
+	int status = 0;
+	GtkApplication* app = gtk_application_new ("org.gtk.example", G_APPLICATION_DEFAULT_FLAGS);
 	g_signal_connect (app, "activate", G_CALLBACK (activate), &toUse);
 	status = g_application_run (G_APPLICATION (app), 0, NULL);
 	g_object_unref (app);

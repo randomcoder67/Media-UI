@@ -1,3 +1,4 @@
+#include "gamesUI.h"
 #include "gamesJSON.h"
 
 // Necessary for qsort
@@ -39,16 +40,14 @@ void getGenres(json_object* root, char** arrayA) {
 
 // Get the games from a specific genre
 void getGamesFromGenre(json_object* root, char* arrayA[], char* genreName, int genreLength) {
-	printf("%s\n", genreName);
+	//printf("%s\n", genreName);
 	json_object* genre = json_object_object_get(root, genreName);
 	int i = 0;
 	
 	// First make temp array with only the needed length
 	char* tempArray[genreLength];
 	json_object_object_foreach(genre, key, val) {
-		if (i == genreLength) {
-			break;
-		}
+		if (i == genreLength) break;
 		tempArray[i] = key;
 		i++;
 	}
@@ -57,8 +56,8 @@ void getGamesFromGenre(json_object* root, char* arrayA[], char* genreName, int g
 	
 	// Then copy the values to the given array
 	for (int i=0; i<genreLength; i++) {
-		printf("%s\n", tempArray[i]);
+		//printf("%s\n", tempArray[i]);
 		arrayA[i] = tempArray[i];
 	}
-	printf("\n\n");
+	//printf("\n\n");
 }

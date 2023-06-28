@@ -1,6 +1,5 @@
 #include <gtk/gtk.h>
 #include <stdbool.h>
-#include "gamesJSON.h"
 #include "pathsAndStuff.h"
 
 typedef struct fullData {
@@ -11,6 +10,7 @@ typedef struct fullData {
 	int* genreLengths; // The genre lengths 
 } fullData;
 
+void remakeCurrent(int lenCurrent);
 void getSize(GtkApplication *app, gpointer user_data);
 bool isGameInCurrent(char* game);
 void sortCurrentGames(int length);

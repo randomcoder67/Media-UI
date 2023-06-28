@@ -3,17 +3,12 @@
 
 int main() {
 	// Init filenames
-	int lengthHome = strlen(getenv("HOME"));
-	char home[lengthHome-1];
-	strcpy(home, getenv("HOME"));
-	int lengthCurrent = strlen(CURRENT_SAVE_PATH);
-	int lengthAll = strlen(ALL_GAMES_JSON_PATH);
-	char fileNameCurrentGames[lengthHome+lengthCurrent+1];
-	char fileNameAllGames[lengthHome+lengthAll+1];
-	strcpy(fileNameCurrentGames, home);
-	strcpy(fileNameAllGames, home);
-	strcat(fileNameCurrentGames, CURRENT_SAVE_PATH);
-	strcat(fileNameAllGames, ALL_GAMES_JSON_PATH);
+	int lengthAllFilename = strlen(getenv("HOME")) + strlen(ALL_GAMES_JSON_PATH) + 1;
+	int lengthCurrentFilename = strlen(getenv("HOME")) + strlen(CURRENT_SAVE_PATH) + 1;
+	char fileNameAllGames[lengthAllFilename];
+	char fileNameCurrentGames[lengthCurrentFilename];
+	strcpy(fileNameAllGames, getenv("HOME")); strcat(fileNameAllGames, ALL_GAMES_JSON_PATH);
+	strcpy(fileNameCurrentGames, getenv("HOME")); strcat(fileNameCurrentGames, CURRENT_SAVE_PATH);
 	
 	// Get current.json
 	json_object* current_root = json_object_from_file(fileNameCurrentGames);

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <json-c/json.h>
 #include <string.h>
+#include "pathsAndStuff.h"
 
 #ifndef _GAMESJSONH_
 #define _GAMESJSONH_
