@@ -196,9 +196,7 @@ void makeImages(char** allGames, int numGames, int curGenre, int* genreLengths, 
 		gtk_widget_set_margin_start(imageA, 10);
 		gtk_widget_set_margin_end(imageA, 10);
 		
-		// Attach to master grid
-		int posY = i/gridWidth;
-		int posX = i-gridWidth-(posY*gridWidth);
+		// Add to images array 
 		toAddTo[i+curGenre*numGames] = imageA;
 	}
 }
