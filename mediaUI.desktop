@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Media UI
+Exec=/usr/bin/env sh -c "$HOME/Programs/myRepos/mediaUI/gamesUI"
+Icon=applications-games
+Terminal=false
+Categories=Game
