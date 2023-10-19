@@ -116,7 +116,7 @@ void initCurrentGames(const char* gameToAdd, int index) {
 	}
 	for (int i=0; i<50; i++) {
 		if (strcmp(currentGames[i], "END") == 0) { // If the current index is END, add game here
-			currentGames[i] = gameToAdd;
+			currentGames[i] = (char*)gameToAdd;
 			currentGames[i+1] = "END"; // Mark next index as END
 			break;
 		}
