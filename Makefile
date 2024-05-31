@@ -14,3 +14,5 @@ check:
 
 clean:
 	rm gamesUI gamesUI.o gamesJSON.o main.o
+
+full: normal install clean

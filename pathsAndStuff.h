@@ -3,5 +3,5 @@
 #define COVER_ART_PATH "/Programs/output/.covers/bmpResized/"
 #define COVER_ART_EXTENSION ".bmp"
 #define NUM_GENRES 14
-#define MAX_CURRENT_GAMES 50
-#define MAX_GAMES_PER_GENRE 50
+#define MAX_CURRENT_GAMES 100
+#define MAX_GAMES_PER_GENRE 100
