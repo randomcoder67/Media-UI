@@ -1,5 +1,10 @@
 # Media UI
 
+![Static Badge](https://img.shields.io/badge/Linux-grey?logo=linux)
+![Static Badge](https://img.shields.io/badge/C-004283)
+![Static Badge](https://img.shields.io/badge/Usage-Simple_Media_GUI-blue)
+![GitHub License](https://img.shields.io/github/license/randomcoder67/Media-UI)
+
 A program to display all the games you own, sorted by genre, and allows selecting certain games to be in a "Current" section to keep track of the games you are currently playing. 
 
 ![Media UI Example Screenshot](screenshot.png)
